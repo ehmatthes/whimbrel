@@ -29,7 +29,7 @@ class Whimbrel:
         subprocess.call(cmd)
 
         # Always show the name of the program on the first line.
-        print("WHIMBREL\n")
+        print("WHIMBREL | [T] write Text [Esc] command mode [Q] Quit\n")
         print(self.buffer, end="", flush=True)
 
     def run(self):
@@ -38,19 +38,24 @@ class Whimbrel:
         while new_char != "q":
             new_char = self._get_char()
 
-            # Break on quit character.
-            if new_char == "q":
+            if new_char == "q" and self.mode == "COMMAND":
                 break
-            else:
-                pass
-
-            # Convert Enter to proper newline.
-            #   This is almost certainly macOS-specific.
-            if new_char == "\r":
+            elif new_char == "\x1b":
+                # Process escape character.
+                self.mode = "COMMAND"
+            elif new_char.lower() == "t" and self.mode == "COMMAND":
+                self.mode = "TEXT"
+                continue
+            elif new_char == "\r":
+                # Convert Enter to proper newline.
+                #   This is almost certainly macOS-specific.
                 new_char = "\r\n"
 
-            self.buffer += new_char
-            self.paint_screen()
+            if self.mode == "COMMAND":
+                self._process_command(new_char)
+            elif self.mode == "TEXT":
+                self.buffer += new_char
+                self.paint_screen()
 
         print("Writing to log file...")
         self.logfile.write_text(self.buffer)
@@ -66,6 +71,10 @@ class Whimbrel:
             return sys.stdin.read(1)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+    def _process_command(self, char):
+        """Process commands entered while in COMMAND mode."""
+        pass
 
     def _quit(self):
         self.buffer = "Goodbye, and thank you for trying Whimbrel!"
