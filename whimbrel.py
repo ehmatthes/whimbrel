@@ -58,6 +58,11 @@ class Whimbrel:
                 # Convert Enter to proper newline.
                 #   This is almost certainly macOS-specific.
                 new_char = "\r\n"
+            elif new_char == "\x7f":
+                # Process backspace character.
+                self.buffer = self.buffer[:-1]
+                self.paint_screen()
+                continue
 
             if self.mode == "COMMAND":
                 self._process_command(new_char)
