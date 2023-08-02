@@ -17,6 +17,7 @@ class Whimbrel:
         self.mode = "COMMAND"
         self.logfile = Path('logs/log.txt')
         self.buffer = ""
+        self.filename = ""
 
         self.paint_screen()
         self.run()
@@ -70,6 +71,17 @@ class Whimbrel:
         """Process commands entered while in COMMAND mode."""
         if char.lower() == "q":
             self._quit()
+        elif char.lower() == "s":
+            self._save_file()
+
+    def _save_file(self):
+        """Write the current buffer to a file."""
+        if not self.filename:
+            self.filename = "my_file.txt"
+
+        path = Path(self.filename)
+        path.write_text(self.buffer)
+
 
     def _quit(self):
         # Log buffer, for diagnostic purposes.
