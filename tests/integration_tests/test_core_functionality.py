@@ -24,7 +24,8 @@ def test_run_whimbrel_expect_fail(whimbrel_path):
     child = pexpect.spawn(f'python {whimbrel_path}')
     child.expect("WHIMBRELLLL", timeout=0.1)
 
-@pytest.mark.parametrize("file_ext", [".txt", ".json", ".yaml"])
+file_extensions = [".txt", ".json", ".yaml"]
+@pytest.mark.parametrize("file_ext", file_extensions)
 def test_open_file(whimbrel_path, file_ext):
     """Test I can open a file:
     - Without crashing;
