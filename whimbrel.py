@@ -41,7 +41,7 @@ class Whimbrel:
             note = f"   {self.filename}"
 
         if show_info:
-            print(f"WHIMBREL   |   mode: {self.mode}{note}   |   [Esc] command mode   [T] enter Text   [S] Save buffer   [Q] Quit\n")
+            print(f"WHIMBREL   |   mode: {self.mode}{note}   |   [Esc] command mode   [T] enter Text   [R] Read file   [S] Save buffer   [Q] Quit\n")
         print(self.buffer, end="", flush=True)
 
     def run(self):
@@ -87,18 +87,17 @@ class Whimbrel:
         """Process commands entered while in COMMAND mode."""
         if char.lower() == "q":
             self._quit()
+        elif char.lower() == "r":
+            self._get_filename()
+            self._read_file()
+            self.paint_screen()
         elif char.lower() == "s":
             self._save_file()
 
-    def _save_file(self):
-        """Write the current buffer to a file."""
-        if not self.filename:
-            self.filename = input("\n\n\nFilename: ")
 
-        path = Path(self.filename)
-        path.write_text(self.buffer)
-
-        self.paint_screen(note="Saved file.", show_info=True)
+    def _get_filename(self):
+        """Get a new filename."""
+        self.filename = input("\n\n\nFilename: ")
 
 
     def _read_file(self):
@@ -109,6 +108,17 @@ class Whimbrel:
         except FileNotFoundError:
             self.filename = ""
             return f"{path} not found."
+
+
+    def _save_file(self):
+        """Write the current buffer to a file."""
+        if not self.filename:
+            self.filename = input("\n\n\nFilename: ")
+
+        path = Path(self.filename)
+        path.write_text(self.buffer)
+
+        self.paint_screen(note="Saved file.", show_info=True)
 
 
     def _quit(self):
