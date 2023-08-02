@@ -12,14 +12,18 @@ from pathlib import Path
 
 class Whimbrel:
 
-    def __init__(self):
+    def __init__(self, filename=""):
         """Initialize the editor."""
         self.mode = "TEXT"
         self.logfile = Path('logs/log.txt')
         self.buffer = ""
-        self.filename = ""
+        self.filename = filename
 
-        self.paint_screen()
+        note = ""
+        if self.filename:
+            note = self._read_file()
+
+        self.paint_screen(note=note)
         self.run()
 
     def paint_screen(self, show_info=True, note=""):
@@ -97,6 +101,16 @@ class Whimbrel:
         self.paint_screen(note="Saved file.", show_info=True)
 
 
+    def _read_file(self):
+        """Read a file into the buffer."""
+        path = Path(self.filename)
+        try:
+            self.buffer = path.read_text()
+        except FileNotFoundError:
+            self.filename = ""
+            return f"{path} not found."
+
+
     def _quit(self):
         # Log buffer, for diagnostic purposes.
         self.logfile.write_text(self.buffer)
@@ -108,4 +122,11 @@ class Whimbrel:
 
 
 if __name__ == "__main__":
-    whimbrel = Whimbrel()
+    # Get filename if one has been passed.
+    if len(sys.argv) > 1:
+        filename = sys.argv[1]
+    else:
+        filename = ""
+
+    # Start the Whimbrel editor.
+    whimbrel = Whimbrel(filename=filename)
