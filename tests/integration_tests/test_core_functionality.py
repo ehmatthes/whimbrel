@@ -24,55 +24,14 @@ def test_run_whimbrel_expect_fail(whimbrel_path):
     child = pexpect.spawn(f'python {whimbrel_path}')
     child.expect("WHIMBRELLLL", timeout=0.1)
 
-def test_open_file_txt(whimbrel_path):
+@pytest.mark.parametrize("file_ext", [".txt", ".json", ".yaml"])
+def test_open_file(whimbrel_path, file_ext):
     """Test I can open a file:
     - Without crashing;
     - See contents of file in buffer;
     - Verify that contents of file are unchanged.
     """
-    reference_file = Path(__file__).parent / "reference_files" / "great_birds.txt"
-
-    # Read reference file text before opening it.
-    original_reference_file_text = reference_file.read_text()
-
-    # A saved file has a different line ending than what's used in the buffer.
-    expected_text = reference_file.read_text().strip().replace('\n', '\r\n')
-
-    child = pexpect.spawn(f"python {whimbrel_path} {reference_file}")
-    child.expect(expected_text, timeout=0.1)
-
-    # Make sure reference file is unchanged.
-    reference_file_text = reference_file.read_text()
-    assert reference_file_text == original_reference_file_text
-
-def test_open_file_json(whimbrel_path):
-    """Test I can open a file:
-    - Without crashing;
-    - See contents of file in buffer;
-    - Verify that contents of file are unchanged.
-    """
-    reference_file = Path(__file__).parent / "reference_files" / "great_birds.json"
-
-    # Read reference file text before opening it.
-    original_reference_file_text = reference_file.read_text()
-
-    # A saved file has a different line ending than what's used in the buffer.
-    expected_text = reference_file.read_text().strip().replace('\n', '\r\n')
-
-    child = pexpect.spawn(f"python {whimbrel_path} {reference_file}")
-    child.expect(expected_text, timeout=0.1)
-
-    # Make sure reference file is unchanged.
-    reference_file_text = reference_file.read_text()
-    assert reference_file_text == original_reference_file_text
-
-def test_open_file_yaml(whimbrel_path):
-    """Test I can open a file:
-    - Without crashing;
-    - See contents of file in buffer;
-    - Verify that contents of file are unchanged.
-    """
-    reference_file = Path(__file__).parent / "reference_files" / "great_birds.yaml"
+    reference_file = Path(__file__).parent / "reference_files" / f"great_birds{file_ext}"
 
     # Read reference file text before opening it.
     original_reference_file_text = reference_file.read_text()
