@@ -6,3 +6,4 @@ __pycache__/
 *.pyc
 
 sandbox.py
+log.txt

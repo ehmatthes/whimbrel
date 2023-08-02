@@ -7,6 +7,7 @@ Current functions:
 """
 
 import os, sys, subprocess, time, termios, tty
+from pathlib import Path
 
 
 class Whimbrel:
@@ -14,6 +15,7 @@ class Whimbrel:
     def __init__(self):
         """Initialize the editor."""
         self.mode = "COMMAND"
+        self.logfile = Path('log.txt')
         self.buffer = ""
 
         self.paint_screen()
@@ -36,6 +38,10 @@ class Whimbrel:
         while new_char != "q":
             new_char = self._get_char()
 
+            # Break on quit character.
+            if new_char == "q":
+                break
+
             # Convert Enter to proper newline.
             #   This is almost certainly macOS-specific.
             if new_char == "\r":
@@ -43,6 +49,8 @@ class Whimbrel:
 
             self.buffer += new_char
             self.paint_screen()
+
+        self.logfile.write_text(self.buffer)
 
         # Quit cleanly.
         self._quit()
