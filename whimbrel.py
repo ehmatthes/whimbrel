@@ -13,38 +13,22 @@ class Whimbrel:
 
     def __init__(self):
         """Initialize the editor."""
-        # Clear terminal screen.
         self.mode = "COMMAND"
         self.buffer = ""
+
         self.paint_screen()
         self.run()
 
     def paint_screen(self):
         """Repaint the screen."""
+
         # Clear the screen.
         cmd = "cls" if os.name == "nt" else "clear"
         subprocess.call(cmd)
 
         # Always show the name of the program on the first line.
         print("WHIMBREL\n")
-        
-        # Display the current buffer.
-        if not self.buffer:
-            return
-
-        # We have some data, so show it.
-        # if self.buffer[-1] == "\r":
-        #     print(self.buffer)
-        # else:
-        #     print(self.buffer, end="", flush=True)
-
-        # if self.buffer[-2:] == "\r\n":
-        #     print(self.buffer, end="", flush=True)
-        # else:
-        #     print(self.buffer, end="", flush=True)
-
         print(self.buffer, end="", flush=True)
-
 
     def run(self):
         """Wait for input."""
@@ -52,13 +36,10 @@ class Whimbrel:
         while new_char != "q":
             new_char = self._get_char()
 
+            # Convert Enter to proper newline.
+            #   This is almost certainly macOS-specific.
             if new_char == "\r":
-                # print('here1')
-                # time.sleep(1)
                 new_char = "\r\n"
-            # if new_char == "\r\n":
-            #     print('here2')
-            #     time.sleep(1)
 
             self.buffer += new_char
             self.paint_screen()
@@ -80,7 +61,6 @@ class Whimbrel:
         self.paint_screen()
         print("\n\n")
         sys.exit()
-
 
 
 if __name__ == "__main__":
