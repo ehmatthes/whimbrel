@@ -13,9 +13,8 @@ from pathlib import Path
 import pexpect
 import pytest
 
-def test_run_whimbrel():
+def test_run_whimbrel(whimbrel_path):
     """Test that I can run Whimbrel, and see expected output."""
-    whimbrel_path = Path(__file__).parent.parent.parent / "whimbrel.py"
     child = pexpect.spawn(f'python {whimbrel_path}')
     child.expect("WHIMBREL", timeout=0.1)
 
