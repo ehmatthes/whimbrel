@@ -19,19 +19,17 @@ def test_run_whimbrel(whimbrel_path):
     child.expect("WHIMBREL", timeout=0.1)
 
 @pytest.mark.xfail
-def test_run_whimbrel_expect_fail():
+def test_run_whimbrel_expect_fail(whimbrel_path):
     """Test that I can run Whimbrel, and fail to see unexpected output."""
-    whimbrel_path = Path(__file__).parent.parent.parent / "whimbrel.py"
     child = pexpect.spawn(f'python {whimbrel_path}')
     child.expect("WHIMBRELLLL", timeout=0.1)
 
-def test_open_file():
+def test_open_file(whimbrel_path):
     """Test I can open a file:
     - Without crashing;
     - See contents of file in buffer;
     - Verify that contents of file are unchanged.
     """
-    whimbrel_path = Path(__file__).parent.parent.parent / "whimbrel.py"
     reference_file = Path(__file__).parent / "reference_files" / "great_birds.txt"
 
     # Read reference file text before opening it.
