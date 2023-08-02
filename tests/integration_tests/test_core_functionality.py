@@ -25,7 +25,7 @@ def test_run_whimbrel(whimbrel_path):
 def test_run_whimbrel_expect_fail(whimbrel_path):
     """Test that I can run Whimbrel, and fail to see unexpected output."""
     child = pexpect.spawn(f'python {whimbrel_path}')
-    
+
     with pytest.raises(pexpect.exceptions.TIMEOUT):
         child.expect("WHIMBRELLLL", timeout=0.1)
 
@@ -136,7 +136,7 @@ def test_open_save_file(whimbrel_path, tmp_path, file_ext):
     # Make sure test file is unchanged.
     assert test_file.read_text() == reference_file.read_text()
 
-@pytest.mark.skip
+# @pytest.mark.skip
 @pytest.mark.parametrize("file_ext", file_extensions)
 def test_open_modify_save_file(whimbrel_path, tmp_path, file_ext):
     """Test that if I open and then modify a file, it does not match the original."""
@@ -156,7 +156,9 @@ def test_open_modify_save_file(whimbrel_path, tmp_path, file_ext):
 
     # Add a character.
     child.send("A")
-    sleep(0.1)
+    expected_text = expected_text + "A"
+    child.expect(expected_text, timeout=0.1)
+    # sleep(0.1)
 
     # Save file in Whimbrel.
     child.send("\x1b")
@@ -186,3 +188,25 @@ def test_save_single_character(whimbrel_path, tmp_path):
 
     saved_text = test_file.read_text()
     assert saved_text == "w"
+
+def test_save_word(whimbrel_path, tmp_path):
+    """Test that I can write a single word to a file."""
+    test_file = tmp_path / "my_file.txt"
+
+    child = pexpect.spawn(f'python {whimbrel_path}')
+    child.expect("WHIMBREL", timeout=0.1)
+
+    partial_word = ""
+    for char in "whimbrel":
+        partial_word += char
+        child.send(char)
+        child.expect(f"Quit\r\n\r\n{partial_word}", timeout=0.1)
+
+    # Esc to command mode.
+    child.send("\x1b")
+    child.send("S")
+    child.sendline(test_file.as_posix())
+    sleep(0.1)
+
+    saved_text = test_file.read_text()
+    assert saved_text == "whimbrel"
