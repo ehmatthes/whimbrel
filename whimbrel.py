@@ -37,12 +37,12 @@ class Whimbrel:
         while True:
             new_char = self._get_char()
 
-            # if new_char == "q" and self.mode == "COMMAND":
-            #     break
             if new_char == "\x1b":
                 # Process escape character.
                 self.mode = "COMMAND"
             elif new_char.lower() == "t" and self.mode == "COMMAND":
+                # This needs to be processed here, otherwise "t" will
+                #   become part of the buffer.
                 self.mode = "TEXT"
                 self.paint_screen()
                 continue
