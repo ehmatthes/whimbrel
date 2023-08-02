@@ -22,11 +22,12 @@ def test_run_whimbrel(whimbrel_path):
     child = pexpect.spawn(f'python {whimbrel_path}')
     child.expect("WHIMBREL", timeout=0.1)
 
-@pytest.mark.xfail
 def test_run_whimbrel_expect_fail(whimbrel_path):
     """Test that I can run Whimbrel, and fail to see unexpected output."""
     child = pexpect.spawn(f'python {whimbrel_path}')
-    child.expect("WHIMBRELLLL", timeout=0.1)
+    
+    with pytest.raises(pexpect.exceptions.TIMEOUT):
+        child.expect("WHIMBRELLLL", timeout=0.1)
 
 def test_send_text(whimbrel_path):
     """Test I can send a character to Whimbrel, and see it in the buffer."""
