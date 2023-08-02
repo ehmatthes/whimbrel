@@ -105,28 +105,31 @@ def test_open_file(whimbrel_path, file_ext):
     reference_file_text = reference_file.read_text()
     assert reference_file_text == original_reference_file_text
 
-# @pytest.mark.skip
-def test_open_save_file(whimbrel_path):
+def test_open_save_file(whimbrel_path, tmp_path):
     """Test I can open a file and then save it without affecting file contents."""
     file_ext = ".txt"
     reference_file = Path(__file__).parent / "reference_files" / f"great_birds{file_ext}"
+    reference_file_text = reference_file.read_text()
 
-    # Read reference file text before opening it.
-    original_reference_file_text = reference_file.read_text()
+    # Make a copy of the reference file, so we're not acting directly on it.
+    test_file = tmp_path / f"great_birds{file_ext}"
+    test_file.write_text(reference_file_text)
+    assert test_file.read_text() == reference_file.read_text()
+    # sleep(0.1)
 
     # A saved file has a different line ending than what's used in the buffer.
-    expected_text = reference_file.read_text().strip().replace('\n', '\r\n')
+    expected_text = reference_file_text.strip().replace('\n', '\r\n')
 
-    child = pexpect.spawn(f"python {whimbrel_path} {reference_file}")
+    # Start Whimbrel, passing the temp file.
+    child = pexpect.spawn(f"python {whimbrel_path} {test_file}")
     child.expect(expected_text, timeout=0.1)
 
     # Save file in Whimbrel.
     child.send("\x1b")
     child.send("S")
-    
+
     # This sleep is necessary to allow time for saving to complete.
     sleep(0.1)
 
-    # Make sure reference file is unchanged.
-    reference_file_text = reference_file.read_text()
-    assert reference_file_text == original_reference_file_text
+    # Make sure test file is unchanged.
+    assert test_file.read_text() == reference_file.read_text()
