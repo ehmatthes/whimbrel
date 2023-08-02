@@ -15,7 +15,7 @@ class Whimbrel:
     def __init__(self):
         """Initialize the editor."""
         self.mode = "COMMAND"
-        self.logfile = Path('log.txt')
+        self.logfile = Path('logs/log.txt')
         self.buffer = ""
 
         self.paint_screen()
@@ -25,8 +25,8 @@ class Whimbrel:
         """Repaint the screen."""
 
         # Clear the screen.
-        cmd = "cls" if os.name == "nt" else "clear"
-        subprocess.call(cmd)
+        # cmd = "cls" if os.name == "nt" else "clear"
+        # subprocess.call(cmd)
 
         # Always show the name of the program on the first line.
         print("WHIMBREL\n")
@@ -35,12 +35,20 @@ class Whimbrel:
     def run(self):
         """Wait for input."""
         new_char = "p"
+        lf = 0
         while new_char != "q":
             new_char = self._get_char()
+            path = Path(f"logs/logfile_{lf}.txt")
+            # path.write_text(new_char)
+            lf += 1
 
             # Break on quit character.
             if new_char == "q":
+                # print('BBB')
                 break
+            else:
+                # print('CCC')
+                pass
 
             # Convert Enter to proper newline.
             #   This is almost certainly macOS-specific.
@@ -50,6 +58,7 @@ class Whimbrel:
             self.buffer += new_char
             self.paint_screen()
 
+        print("Writing to log file...")
         self.logfile.write_text(self.buffer)
 
         # Quit cleanly.
@@ -68,6 +77,7 @@ class Whimbrel:
         self.buffer = "Goodbye, and thank you for trying Whimbrel!"
         self.paint_screen()
         print("\n\n")
+        print('EXIT_MARKER', flush=True)
         sys.exit()
 
 
