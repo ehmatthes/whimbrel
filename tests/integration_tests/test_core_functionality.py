@@ -35,8 +35,15 @@ def test_open_file():
     whimbrel_path = Path(__file__).parent.parent.parent / "whimbrel.py"
     reference_file = Path(__file__).parent / "reference_files" / "great_birds.txt"
 
+    # Read reference file text before opening it.
+    original_reference_file_text = reference_file.read_text()
+
     # A saved file has a different line ending than what's used in the buffer.
     expected_text = reference_file.read_text().strip().replace('\n', '\r\n')
 
     child = pexpect.spawn(f"python {whimbrel_path} {reference_file}")
     child.expect(expected_text, timeout=0.1)
+
+    # Make sure reference file is unchanged.
+    reference_file_text = reference_file.read_text()
+    assert reference_file_text == original_reference_file_text
