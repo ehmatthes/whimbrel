@@ -14,7 +14,7 @@ class Whimbrel:
 
     def __init__(self):
         """Initialize the editor."""
-        self.mode = "COMMAND"
+        self.mode = "TEXT"
         self.logfile = Path('logs/log.txt')
         self.buffer = ""
         self.filename = ""
