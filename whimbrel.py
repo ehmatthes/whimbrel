@@ -21,21 +21,20 @@ class Whimbrel:
         self.paint_screen()
         self.run()
 
-    def paint_screen(self):
+    def paint_screen(self, show_info=True):
         """Repaint the screen."""
 
         # Clear the screen.
         cmd = "cls" if os.name == "nt" else "clear"
         subprocess.call(cmd)
 
-        # Always show the name of the program on the first line.
-        print("WHIMBREL | [T] write Text [Esc] command mode [Q] Quit\n")
+        if show_info:
+            print(f"WHIMBREL   |   mode: {self.mode}   |   [Esc] command mode   [T] enter Text   [Q] Quit\n")
         print(self.buffer, end="", flush=True)
 
     def run(self):
         """Wait for input."""
-        new_char = "p"
-        while new_char != "q":
+        while True:
             new_char = self._get_char()
 
             if new_char == "q" and self.mode == "COMMAND":
@@ -45,6 +44,7 @@ class Whimbrel:
                 self.mode = "COMMAND"
             elif new_char.lower() == "t" and self.mode == "COMMAND":
                 self.mode = "TEXT"
+                self.paint_screen()
                 continue
             elif new_char == "\r":
                 # Convert Enter to proper newline.
@@ -77,8 +77,8 @@ class Whimbrel:
         pass
 
     def _quit(self):
-        self.buffer = "Goodbye, and thank you for trying Whimbrel!"
-        self.paint_screen()
+        self.buffer = "Goodbye, and thank you for trying Whimbrel!\n\n"
+        self.paint_screen(show_info=False)
 
         sys.exit()
 
