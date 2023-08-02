@@ -27,7 +27,16 @@ def test_run_whimbrel_expect_fail():
     child.expect("WHIMBRELLLL", timeout=0.1)
 
 def test_open_file():
-    path = Path(__file__).parent / "reference_files" / "great_birds.txt"
-    print(path)
-    # child = pexpect.spawn('python whimbrel.py ')
-    # child.expect("WHIMBREL", timeout=0.1)
+    """Test I can open a file:
+    - Without crashing;
+    - See contents of file in buffer;
+    - Verify that contents of file are unchanged.
+    """
+    whimbrel_path = Path(__file__).parent.parent.parent / "whimbrel.py"
+    reference_file = Path(__file__).parent / "reference_files" / "great_birds.txt"
+
+    # A saved file has a different line ending than what's used in the buffer.
+    expected_text = reference_file.read_text().strip().replace('\n', '\r\n')
+
+    child = pexpect.spawn(f"python {whimbrel_path} {reference_file}")
+    child.expect(expected_text, timeout=0.1)
