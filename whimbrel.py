@@ -37,9 +37,9 @@ class Whimbrel:
         while True:
             new_char = self._get_char()
 
-            if new_char == "q" and self.mode == "COMMAND":
-                break
-            elif new_char == "\x1b":
+            # if new_char == "q" and self.mode == "COMMAND":
+            #     break
+            if new_char == "\x1b":
                 # Process escape character.
                 self.mode = "COMMAND"
             elif new_char.lower() == "t" and self.mode == "COMMAND":
@@ -57,12 +57,6 @@ class Whimbrel:
                 self.buffer += new_char
                 self.paint_screen()
 
-        print("Writing to log file...")
-        self.logfile.write_text(self.buffer)
-
-        # Quit cleanly.
-        self._quit()
-
     def _get_char(self):
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
@@ -74,9 +68,13 @@ class Whimbrel:
 
     def _process_command(self, char):
         """Process commands entered while in COMMAND mode."""
-        pass
+        if char.lower() == "q":
+            self._quit()
 
     def _quit(self):
+        # Log buffer, for diagnostic purposes.
+        self.logfile.write_text(self.buffer)
+
         self.buffer = "Goodbye, and thank you for trying Whimbrel!\n\n"
         self.paint_screen(show_info=False)
 
