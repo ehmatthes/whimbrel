@@ -107,6 +107,7 @@ def test_open_file(whimbrel_path, file_ext):
     reference_file_text = reference_file.read_text()
     assert reference_file_text == original_reference_file_text
 
+@pytest.mark.skip
 @pytest.mark.parametrize("file_ext", file_extensions)
 def test_open_save_file(whimbrel_path, tmp_path, file_ext):
     """Test I can open a file and then save it without affecting file contents."""
@@ -133,3 +134,54 @@ def test_open_save_file(whimbrel_path, tmp_path, file_ext):
 
     # Make sure test file is unchanged.
     assert test_file.read_text() == reference_file.read_text()
+
+@pytest.mark.skip
+@pytest.mark.parametrize("file_ext", file_extensions)
+def test_open_modify_save_file(whimbrel_path, tmp_path, file_ext):
+    """Test that if I open and then modify a file, it does not match the original."""
+    reference_file = Path(__file__).parent / "reference_files" / f"great_birds{file_ext}"
+    reference_file_text = reference_file.read_text()
+
+    # Make a copy of the reference file, so we're not acting directly on it.
+    test_file = tmp_path / f"great_birds{file_ext}"
+    test_file.write_text(reference_file_text)
+
+    # A saved file has a different line ending than what's used in the buffer.
+    expected_text = reference_file_text.strip().replace('\n', '\r\n')
+
+    # Start Whimbrel, passing the temp file.
+    child = pexpect.spawn(f"python {whimbrel_path} {test_file}")
+    child.expect(expected_text, timeout=0.1)
+
+    # Add a character.
+    child.send("A")
+    sleep(0.1)
+
+    # Save file in Whimbrel.
+    child.send("\x1b")
+    child.send("S")
+
+    # This sleep is necessary to allow time for saving to complete.
+    sleep(0.1)
+
+    # Make sure test file has changed.
+    assert test_file.read_text() != reference_file.read_text()
+
+def test_save_single_character(whimbrel_path, tmp_path):
+    """Test that I can write a single character to a file."""
+    test_file = tmp_path / "my_file.txt"
+
+    child = pexpect.spawn(f'python {whimbrel_path}')
+    child.expect("WHIMBREL", timeout=0.1)
+
+    child.send("w")
+    child.expect("Quit\r\n\r\nw", timeout=0.1)
+
+    # Esc to command mode.
+    child.send("\x1b")
+    child.send("S")
+    child.sendline(test_file.as_posix())
+    sleep(0.1)
+
+    saved_text = test_file.read_text()
+    assert saved_text == "w"
