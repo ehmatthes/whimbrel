@@ -22,15 +22,22 @@ class Whimbrel:
         self.paint_screen()
         self.run()
 
-    def paint_screen(self, show_info=True):
+    def paint_screen(self, show_info=True, note=""):
         """Repaint the screen."""
 
         # Clear the screen.
         cmd = "cls" if os.name == "nt" else "clear"
         subprocess.call(cmd)
 
+        # Add space to note if it exists.
+        #   If no current note, show filename if it's set.
+        if note:
+            note = f"   {note}"
+        elif self.filename:
+            note = f"   {self.filename}"
+
         if show_info:
-            print(f"WHIMBREL   |   mode: {self.mode}   |   [Esc] command mode   [T] enter Text   [Q] Quit\n")
+            print(f"WHIMBREL   |   mode: {self.mode}{note}   |   [Esc] command mode   [T] enter Text   [S] Save buffer   [Q] Quit\n")
         print(self.buffer, end="", flush=True)
 
     def run(self):
@@ -77,10 +84,12 @@ class Whimbrel:
     def _save_file(self):
         """Write the current buffer to a file."""
         if not self.filename:
-            self.filename = "my_file.txt"
+            self.filename = input("\n\n\nFilename: ")
 
         path = Path(self.filename)
         path.write_text(self.buffer)
+
+        self.paint_screen(note="Saved file.", show_info=True)
 
 
     def _quit(self):
