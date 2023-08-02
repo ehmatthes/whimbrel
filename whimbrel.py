@@ -15,24 +15,35 @@ class Whimbrel:
         """Initialize the editor."""
         # Clear terminal screen.
         self.mode = "COMMAND"
+        self.buffer = ""
         self.paint_screen()
         self.run()
 
     def paint_screen(self):
         """Repaint the screen."""
+        # Clear the screen.
         cmd = "cls" if os.name == "nt" else "clear"
         subprocess.call(cmd)
+
+        # Always show the name of the program on the first line.
         print("WHIMBREL\n")
+        
+        # Display the current buffer.
+        if self.buffer:
+            print(self.buffer, end="", flush=True)
 
     def run(self):
         """Wait for input."""
         new_char = "p"
         while new_char != "q":
-            new_char = self.get_char()
+            new_char = self._get_char()
+            self.buffer += new_char
             self.paint_screen()
-            print(new_char)
 
-    def get_char(self):
+        # Quit cleanly.
+        self._quit()
+
+    def _get_char(self):
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
@@ -40,6 +51,12 @@ class Whimbrel:
             return sys.stdin.read(1)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+    def _quit(self):
+        self.buffer = "Goodbye, and thank you for trying Whimbrel!"
+        self.paint_screen()
+        print("\n\n")
+        sys.exit()
 
 
 
