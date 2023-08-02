@@ -83,6 +83,8 @@ def test_enter_command_mode(whimbrel_path):
 # --- Core functionality tests ---
 
 file_extensions = [".txt", ".json", ".yaml", ".md"]
+
+
 @pytest.mark.parametrize("file_ext", file_extensions)
 def test_open_file(whimbrel_path, file_ext):
     """Test I can open a file:
@@ -105,17 +107,15 @@ def test_open_file(whimbrel_path, file_ext):
     reference_file_text = reference_file.read_text()
     assert reference_file_text == original_reference_file_text
 
-def test_open_save_file(whimbrel_path, tmp_path):
+@pytest.mark.parametrize("file_ext", file_extensions)
+def test_open_save_file(whimbrel_path, tmp_path, file_ext):
     """Test I can open a file and then save it without affecting file contents."""
-    file_ext = ".txt"
     reference_file = Path(__file__).parent / "reference_files" / f"great_birds{file_ext}"
     reference_file_text = reference_file.read_text()
 
     # Make a copy of the reference file, so we're not acting directly on it.
     test_file = tmp_path / f"great_birds{file_ext}"
     test_file.write_text(reference_file_text)
-    assert test_file.read_text() == reference_file.read_text()
-    # sleep(0.1)
 
     # A saved file has a different line ending than what's used in the buffer.
     expected_text = reference_file_text.strip().replace('\n', '\r\n')
