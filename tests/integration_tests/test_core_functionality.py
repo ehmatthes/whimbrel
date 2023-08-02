@@ -108,7 +108,7 @@ def test_open_file(whimbrel_path, file_ext):
     reference_file_text = reference_file.read_text()
     assert reference_file_text == original_reference_file_text
 
-@pytest.mark.skip
+# @pytest.mark.skip
 @pytest.mark.parametrize("file_ext", file_extensions)
 def test_open_save_file(whimbrel_path, tmp_path, file_ext):
     """Test I can open a file and then save it without affecting file contents."""
@@ -156,7 +156,10 @@ def test_open_modify_save_file(whimbrel_path, tmp_path, file_ext):
 
     # Add a character.
     child.send("A")
-    expected_text = expected_text + "A"
+    if file_ext == ".json":
+        expected_text = expected_text + "A"
+    else:
+        expected_text = expected_text + "\r\nA"
     child.expect(expected_text, timeout=0.1)
     # sleep(0.1)
 
