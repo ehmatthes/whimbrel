@@ -13,6 +13,9 @@ from pathlib import Path
 import pexpect
 import pytest
 
+
+# --- Validate testing approach ---
+
 def test_run_whimbrel(whimbrel_path):
     """Test that I can run Whimbrel, and see expected output."""
     child = pexpect.spawn(f'python {whimbrel_path}')
@@ -23,6 +26,60 @@ def test_run_whimbrel_expect_fail(whimbrel_path):
     """Test that I can run Whimbrel, and fail to see unexpected output."""
     child = pexpect.spawn(f'python {whimbrel_path}')
     child.expect("WHIMBRELLLL", timeout=0.1)
+
+def test_send_text(whimbrel_path):
+    """Test I can send a character to Whimbrel, and see it in the buffer."""
+    child = pexpect.spawn(f'python {whimbrel_path}')
+    child.expect("WHIMBREL", timeout=0.1)
+
+    child.send("E")
+    expected_text = 'Quit\r\n\r\nE'
+    child.expect(expected_text, timeout=0.1)
+
+def test_enter_command_mode(whimbrel_path):
+    """Test I can enter command mode.
+
+    I'm not sure what to look for right after entering escape.
+    So:
+    - enter text
+    - verify text
+    - enter command mode
+    - enter text
+    - exit command mode
+    - verify command mode text not present
+    - enter text
+    - verify new text added to old text
+    """
+    child = pexpect.spawn(f'python {whimbrel_path}')
+    child.expect("WHIMBREL", timeout=0.1)
+
+    # Send a couple characters first, to make sure no issue with 
+    #   sending simple characters.
+    child.send("A")
+    expected_text = 'Quit\r\n\r\nA'
+    child.expect(expected_text, timeout=0.1)
+
+    child.send("B")
+    expected_text = 'Quit\r\n\r\nAB'
+    child.expect(expected_text, timeout=0.1)
+
+    # Esc to command mode.
+    child.send("\x1b")
+
+    # Send C, which should not be added to buffer.
+    child.send("C")
+
+    # Return to text mode.
+    child.send("T")
+
+    # Send D, which should be added to buffer.
+    child.send("D")
+    expected_text = 'Quit\r\n\r\nABD'
+    child.expect(expected_text, timeout=0.1)
+
+
+
+# --- Core functionality tests ---
 
 file_extensions = [".txt", ".json", ".yaml", ".md"]
 @pytest.mark.parametrize("file_ext", file_extensions)
@@ -41,6 +98,29 @@ def test_open_file(whimbrel_path, file_ext):
     expected_text = reference_file.read_text().strip().replace('\n', '\r\n')
 
     child = pexpect.spawn(f"python {whimbrel_path} {reference_file}")
+    child.expect(expected_text, timeout=0.1)
+
+    # Make sure reference file is unchanged.
+    reference_file_text = reference_file.read_text()
+    assert reference_file_text == original_reference_file_text
+
+@pytest.mark.skip
+def test_open_save_file(whimbrel_path):
+    """Test I can open a file and then save it without affecting file contents."""
+    file_ext = ".txt"
+    reference_file = Path(__file__).parent / "reference_files" / f"great_birds{file_ext}"
+
+    # Read reference file text before opening it.
+    original_reference_file_text = reference_file.read_text()
+
+    # A saved file has a different line ending than what's used in the buffer.
+    expected_text = reference_file.read_text().strip().replace('\n', '\r\n')
+
+    child = pexpect.spawn(f"python {whimbrel_path} {reference_file}")
+    child.expect(expected_text, timeout=0.1)
+
+    # Save file in Whimbrel.
+    child.send("\x1b")
     child.expect(expected_text, timeout=0.1)
 
     # Make sure reference file is unchanged.
