@@ -9,6 +9,7 @@ It's important to run the first two tests, because they work in combination.
 """
 
 from pathlib import Path
+from time import sleep
 
 import pexpect
 import pytest
@@ -104,7 +105,7 @@ def test_open_file(whimbrel_path, file_ext):
     reference_file_text = reference_file.read_text()
     assert reference_file_text == original_reference_file_text
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_open_save_file(whimbrel_path):
     """Test I can open a file and then save it without affecting file contents."""
     file_ext = ".txt"
@@ -121,7 +122,10 @@ def test_open_save_file(whimbrel_path):
 
     # Save file in Whimbrel.
     child.send("\x1b")
-    child.expect(expected_text, timeout=0.1)
+    child.send("S")
+    
+    # This sleep is necessary to allow time for saving to complete.
+    sleep(0.1)
 
     # Make sure reference file is unchanged.
     reference_file_text = reference_file.read_text()
